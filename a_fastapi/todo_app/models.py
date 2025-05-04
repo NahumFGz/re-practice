@@ -1,6 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, true
-
 from database import Base
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 
 
 class User(Base):
@@ -17,7 +16,7 @@ class User(Base):
     phone_number = Column(String)
 
 
-class Todos(Base):
+class Todo(Base):
     __tablename__ = "todos"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -25,3 +24,4 @@ class Todos(Base):
     description = Column(String)
     priority = Column(Integer)
     complete = Column(Boolean, default=False)
+    owner_id = Column(Integer, ForeignKey("users.id"))

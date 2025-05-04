@@ -1,8 +1,9 @@
-from fastapi import FastAPI
-from pyexpat import model
+from typing import Annotated
 
 import models
 from database import SessionLocal, engine
+from fastapi import Depends, FastAPI
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
@@ -15,3 +16,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+@app.get("/")
+async def read_all(db: Annotated[Session, Depends(get_db)]):
+    return db.query(models.Todo).all()
