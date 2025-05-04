@@ -1,2 +1,10 @@
 **/**/venv_*
 **/**/node_modules
+
+**/**/.DS_Store
+**/**/__pycache__
+**/**/build
+**/**/dist
+**/**/env
+**/**/env_*
+**/**/env_*_*
