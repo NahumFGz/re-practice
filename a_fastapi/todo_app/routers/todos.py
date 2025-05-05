@@ -5,9 +5,11 @@ from database import SessionLocal, engine
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pydantic import BaseModel, Field
 from routers import auth
+from routers.auth import get_current_user
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/todos", tags=["todos"])
+user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 def get_db():
