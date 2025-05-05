@@ -10,7 +10,7 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-router = APIRouter(tags=["Auth"])
+router = APIRouter(tags=["Auth"], prefix="/auth")
 
 
 SECRET_KEY = "PALABRASUPERSECRETA"

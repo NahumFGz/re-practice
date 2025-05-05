@@ -31,23 +31,31 @@ class TodoRequest(BaseModel):
 
 
 @router.get("/")
-async def read_all(db: Annotated[Session, Depends(get_db)]):
-    return db.query(models.Todo).all()
+async def read_all(user: user_dependency, db: Annotated[Session, Depends(get_db)]):
+    return db.query(models.Todo).filter(models.Todo.owner_id == user.get("id")).all()
 
 
 @router.get("/todo/{todo_id}")
 async def read_todo(
-    todo_id: Annotated[int, Path(..., gt=0)], db: Annotated[Session, Depends(get_db)]
+    todo_id: Annotated[int, Path(..., gt=0)],
+    user: user_dependency,
+    db: Annotated[Session, Depends(get_db)],
 ):
-    todo_model = db.query(models.Todo).filter(models.Todo.id == todo_id).first()
+    todo_model = (
+        db.query(models.Todo)
+        .filter(models.Todo.id == todo_id, models.Todo.owner_id == user.get("id"))
+        .first()
+    )
     if todo_model is not None:
         return todo_model
     raise HTTPException(status_code=404, detail="Todo not found")
 
 
 @router.post("/todo", status_code=status.HTTP_201_CREATED)
-async def create_todo(todo_request: TodoRequest, db: Annotated[Session, Depends(get_db)]):
-    todo_model = models.Todo(**todo_request.model_dump(), owner_id=1)
+async def create_todo(
+    todo_request: TodoRequest, user: user_dependency, db: Annotated[Session, Depends(get_db)]
+):
+    todo_model = models.Todo(**todo_request.model_dump(), owner_id=user.get("id"))
     db.add(todo_model)
     db.commit()
     db.refresh(todo_model)
@@ -59,9 +67,14 @@ async def create_todo(todo_request: TodoRequest, db: Annotated[Session, Depends(
 async def update_todo(
     todo_id: Annotated[int, Path(..., gt=0)],
     todo_request: Annotated[TodoRequest, Body(...)],
+    user: user_dependency,
     db: Annotated[Session, Depends(get_db)],
 ):
-    todo_model = db.query(models.Todo).filter(models.Todo.id == todo_id).first()
+    todo_model = (
+        db.query(models.Todo)
+        .filter(models.Todo.id == todo_id, models.Todo.owner_id == user.get("id"))
+        .first()
+    )
 
     if todo_model is None:
         raise HTTPException(status_code=404, detail="Todo not found")
@@ -81,9 +94,14 @@ async def update_todo(
 @router.delete("/todo/{todo_id}", status_code=status.HTTP_202_ACCEPTED)
 async def delete_todo(
     todo_id: Annotated[int, Path(..., gt=0)],
+    user: user_dependency,
     db: Annotated[Session, Depends(get_db)],
 ):
-    todo_model = db.query(models.Todo).filter(models.Todo.id == todo_id).first()
+    todo_model = (
+        db.query(models.Todo)
+        .filter(models.Todo.id == todo_id, models.Todo.owner_id == user.get("id"))
+        .first()
+    )
 
     if todo_model is None:
         raise HTTPException(status_code=404, detail="Todo not found")
